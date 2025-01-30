@@ -1,0 +1,55 @@
+if __name__ == '__main__':
+    from PIL import Image
+    import time
+    import os
+
+    def evaluate(compression_func, quality):
+        x1 = time.time()
+        total_size = 0
+        total_bitmap_size = 0
+        count = 0
+
+        for image in os.listdir("image library"):
+            count += 1
+            with Image.open("image library/" + image) as img:
+                print(f'{image}:')
+
+                print(f"size of image as jpeg: {round(os.path.getsize('image library/' + image) / 1024, 1)} KB")
+
+                t1 = time.perf_counter()  # encoding timer
+                img = img.convert("RGB")
+                img.save(f'bitmap {image}', "BMP")  # saves image as a bitmap
+                print(f'time to decode image: {round(time.perf_counter() - t1, 5)}s')  # time to convert it to a bitmap
+                print(f'size of bitmap image: {round(os.path.getsize(f"bitmap {image}") / 1024, 1)} KB')
+                total_bitmap_size += os.path.getsize(f"bitmap {image}")
+
+                t2 = time.perf_counter()  # decoding timer
+                compression_func(f'bitmap {image}', f'jpeg {image}', quality) # quality used here - can be varied
+                print(f'time to encode image: {round(time.perf_counter() - t2, 5)}s')
+                print(f'size of final jpeg image, reduced quality: {round(os.path.getsize(f"jpeg {image}") / 1024, 1)} KB')
+                total_size += os.path.getsize(f"jpeg {image}") / 1024
+                print("\n")
+
+                os.remove(f'jpeg {image}')
+                os.remove(f'bitmap {image}')
+
+        print(f"done, total time was: {time.time() - x1}")
+        print(f'average file size was {round(total_size/count, 4)} KB')
+        print(f'average bitmap file size was {round(total_bitmap_size/count, 4)} KB')
+
+    def compress_image(input_file, output_file, quality=85):
+        with Image.open(input_file) as img:
+            img.save(output_file, "JPEG", quality=quality)
+
+
+    # evaluate(compress_image, 30)
+
+
+    images = ["augustus.jpg", "skyline.jpg", "bottles.jpg", "food.jpg", "Daniel.jpg"]
+    for image in images:
+        with Image.open("image library/" + image) as img:
+            img = img.convert("RGB")
+            img.save(f'bitmap {image}', "BMP")
+            for i in range(1, 6):
+                compress_image(f'jpeg quality {i} {image}', f'jpeg {image}', 20*i)
+
