@@ -26,13 +26,13 @@ def compare(imageA, imageB):
  # Return the SSIM. The higher the value, the more "similar" the two images are.
  return s
 
-def main(): 
+def main(img1, img2):
   # Get options
   args = options()
 
   # Use hardcoded image paths if no arguments are passed
-  first_path = args.first if args.first else "/Users/olegpoborcev/Downloads/PRINGLES.png" # this is where we put the image paths - inside the quotes
-  second_path = args.second if args.second else "/Users/olegpoborcev/Downloads/FLOWER.png" # 
+  first_path = args.first if args.first else img1 # this is where we put the image paths - inside the quotes
+  second_path = args.second if args.second else img2 #
 
   # Import images
   image1 = cv2.imread(first_path)
@@ -70,8 +70,8 @@ def main():
   if round(ratio_orig, 2) == round(ratio_comp, 2):
     mse_value = mse(gray1, gray2)
     ssim_value = compare(gray1, gray2)
-    print("MSE:", mse_value)
-    print("SSIM:", ssim_value)
+    return mse_value, ssim_value
+
 
 if __name__ == '__main__':
-	main()
+    main()
