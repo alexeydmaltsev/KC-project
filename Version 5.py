@@ -4,9 +4,9 @@ if __name__ == '__main__':
     from PIL import Image
     import time
     import os
+    import turbojpeg
 
-
-    def evaluate(compression_func, quality = 50):
+    def evaluate(compression_func, quality, decoding_func=None):
         start_time = time.time()
         total_size = 0
         number_of_images = 0
@@ -18,7 +18,8 @@ if __name__ == '__main__':
 
         for image in os.listdir("image library"):
             number_of_images += 1
-            with Image.open("image library/" + image) as img:
+            with Image.open(f"image library/{image}") as img:
+                # print(f'{image}:')
 
                 img = img.convert("RGB")
                 img.save(f'bitmap {image}', "BMP")  # saves image as a bitmap
@@ -34,18 +35,15 @@ if __name__ == '__main__':
                 total_MSE += MSE
                 total_SSIM += SSIM
 
-
-            with Image.open(f'compressed {image}') as img:
                 decode_timer = time.perf_counter()  # decoding timer
-                img = img.convert("RGB")
-                img.save(f'bitmap {image}', "BMP")  # saves image as a bitmap
-                print(time.perf_counter() - decode_timer)
+                if decoding_func is None:
+                    default_decode(image)
+                else:
+                    decoding_func(image)
                 total_decode += (time.perf_counter() - decode_timer)  # time to convert it to a bitmap
 
-
-
-            os.remove(f'compressed {image}')
-            os.remove(f'bitmap {image}')
+                os.remove(f'compressed {image}')
+                os.remove(f'bitmap {image}')
 
         print(f"done, total time was: {round(time.time() - start_time, 3)}s")
         print(f'{number_of_images} images were compressed')
@@ -59,34 +57,40 @@ if __name__ == '__main__':
         print(f"average SSIM was {round(total_SSIM/number_of_images, 4)}")
 
 
-    def PILLOW_JPG(input_file, output_file, quality=85):
+    def default_decode(image):
+        with Image.open(f"compressed {image}") as img_compressed:
+            img_compressed = img_compressed.convert("RGB")
+            img_compressed.save(f'bitmap {image}', "BMP")  # saves image as a bitmap
+
+
+    def pillowJPEG(input_file, output_file, quality=85):
         with Image.open(input_file) as img:
             img.save(output_file, "JPEG", quality=quality, optimise=True)
 
-
-    def PILLOW_JPG_unoptimised(input_file, output_file, quality=85):
-        with Image.open(input_file) as img:
-            img.save(output_file, "JPEG", quality=quality, optimise=False)
-
-
-    def PILLOW_PNG(input_file, output_file, quality):
-        with Image.open(input_file) as img:
-            img.save(output_file, "PNG", quality=quality,optimise=True)
-
-    def PILLOW_WEBP(input_file, output_file, quality):
+    def pillowWEBP(input_file, output_file, quality=85):
         with Image.open(input_file) as img:
             img.save(output_file, "WEBP", quality=quality, optimise=True)
 
+    def pillowPNG(input_file, output_file, quality=85):
+        with Image.open(input_file) as img:
+            img.save(output_file, "PNG", quality=quality, optimise=True)
 
-    # print("optimised")
-    # evaluate(PILLOW_JPG, 50)
-    # for i in range(5):
-    #     print('\n')
-    #
-    # evaluate(PILLOW_JPG_unoptimised, 50)
-    # for i in range(1, 6):
-    #     print("\n")
-    #     print("\n")
-    #     print(f'quality is {20 * i}')
-    #     evaluate(PILLOW_WEBP, 20*i)
-    evaluate(PILLOW_JPG, 100)
+    print("JPG:")
+    evaluate(pillowJPEG, 50)
+    print("\n")
+    print("\n")
+    print("WEBP:")
+    evaluate(pillowWEBP, 50)
+    print("\n")
+    print("\n")
+    print("PNG:")
+    evaluate(pillowPNG, 50)
+
+
+
+
+
+
+
+
+
