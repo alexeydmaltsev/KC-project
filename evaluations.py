@@ -59,8 +59,16 @@ class Evaluator:
         printer = printing_helper.Printer()
         printer.print_normal_stats(number_of_images, total_decode, total_encode, total_size, total_reduction, total_MSE, total_SSIM)
 
-    def evaluate_decode(self, decoding_func):
+    def evaluate_decode(self, decoding_func, is_numpy = False):
         number_of_images = 0
+        total_MSE = 0
+        total_SSIM = 0
+        total_percent_reduction = 0
         for image in os.listdir("image library"):
             number_of_images += 1
-            decoding_func(f"image library/{image}")
+            if not is_numpy:
+                decoding_func(f"image library/{image}")
+                total_percent_reduction += 100 * os.path.getsize(f"image library/{image}")/os.path.getsize(f'bitmap {image}')
+                MSE, SSIM = SSIM_evaluation_1.main(f"bitmap {image}", f"compressed {image}")
+                total_MSE += MSE
+                total_SSIM += SSIM
