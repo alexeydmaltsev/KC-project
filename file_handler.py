@@ -1,5 +1,6 @@
 from PIL import Image
 from turbojpeg import TurboJPEG, TJPF_GRAY, TJSAMP_GRAY, TJFLAG_PROGRESSIVE, TJFLAG_FASTUPSAMPLE, TJFLAG_FASTDCT
+import pillow_avif
 
 
 class Decoder:
@@ -41,3 +42,6 @@ class Encoder:
     def pillowPNG(self, input_file, output_file, quality=85):
         with Image.open(input_file) as img:
             img.save(output_file, "PNG", quality=quality, optimise=True)
+    def pillowAVIF(self, input_file, output_file, quality = 85):
+        with Image.open(input_file) as img:
+            img.save(output_file + ".avif", quality=quality)
