@@ -36,14 +36,21 @@ class Evaluator:
 
                 encode_timer = time.perf_counter()  # encoding timer
                 if not numpy_needed:
-                    compression_func(f'bitmap {image}.bmp', f'compressed {image}{extension}', quality) # quality used here - can be varied
+                    compression_func(f'bitmap {image}.bmp', f'compressed {image}', quality) # quality used here - can be varied
                 else:
                     compression_func(np_arr, f'compressed {image}', quality)
+
                 total_encode += (time.perf_counter() - encode_timer)
                 total_size += os.path.getsize(f"compressed {image}{extension}") / 1024
                 total_reduction += (bmp_size - os.path.getsize(f"compressed {image}{extension}"))/bmp_size
 
-                MSE, SSIM = SSIM_evaluation_1.main(f"bitmap {image}", f"compressed {image}{extension}")
+                if extension == ".avif":
+                    with Image.open(f"compressed {image}{extension}") as img:
+                        img.save("temp.png", format="PNG")
+                    MSE, SSIM = SSIM_evaluation_1.main(f"bitmap {image}.bmp", "temp.png")
+                    os.remove("temp.png")
+                else:
+                    MSE, SSIM = SSIM_evaluation_1.main(f"bitmap {image}.bmp", f"compressed {image}{extension}")
                 total_MSE += MSE
                 total_SSIM += SSIM
 
@@ -54,8 +61,9 @@ class Evaluator:
                     decoding_func(f'compressed {image}')
                 total_decode += (time.perf_counter() - decode_timer)  # time to convert it to a bitmap
 
-                # os.remove(f'compressed {image}')
-                # os.remove(f'bitmap {image}')
+                os.remove(f'compressed {image}{extension}')
+                os.remove(f'bitmap {image}.bmp')
+                os.remove(f'bitmap compressed {image}.avif')
 
         printer = printing_helper.Printer()
         printer.print_normal_stats(number_of_images, total_decode, total_encode, total_size, total_reduction, total_MSE, total_SSIM, compression_func.__name__)
