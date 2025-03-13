@@ -30,7 +30,7 @@ class Evaluator:
                 bmp_size = os.path.getsize(f"bitmap {image}.bmp")
 
                 if numpy_needed:  # some compression methods require an input of a numpy array and do not take bitmaps
-                    in_file = open(f"image library/{image}.bmp", 'rb')
+                    in_file = open(f"image library/{image}.jpg", 'rb')
                     np_arr = self.jpeg.decode(in_file.read())
                     in_file.close()
 
@@ -63,7 +63,7 @@ class Evaluator:
 
                 os.remove(f'compressed {image}{extension}')
                 os.remove(f'bitmap {image}.bmp')
-                os.remove(f'bitmap compressed {image}.avif')
+                os.remove(f'bitmap compressed {image}{extension}')
 
         printer = printing_helper.Printer()
         printer.print_normal_stats(number_of_images, total_decode, total_encode, total_size, total_reduction, total_MSE, total_SSIM, compression_func.__name__)
